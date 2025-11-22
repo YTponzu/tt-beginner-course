@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピクセルアートエディタ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            border-width: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .tool-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+        }
+
+        .download-btn {
+            background: #51cf66;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #pixelCanvas {
+            border: 3px solid #333;
+            cursor: crosshair;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-toggle {
+            background: #4dabf7;
+            color: white;
+        }
+
+        .mode-toggle:hover {
+            background: #339af0;
+        }
+
+        .mode-toggle.eraser {
+            background: #868e96;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ピクセルアートエディタ</h1>
+        
+        <div class="controls">
+            <div class="color-palette" id="colorPalette"></div>
+            
+            <div class="tool-section">
+                <button class="mode-toggle" id="modeToggle">ペンモード</button>
+                <button class="clear-btn" id="clearBtn">クリア</button>
+                <button class="download-btn" id="downloadBtn">保存</button>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="pixelCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 設定
+        let gridSize = 16; // グリッドの数
+        const pixelSize = 25; // 各ピクセルのサイズ
+        
+        // カラーパレット
+        const colors = [
+            '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+            '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
+            '#FFC0CB', '#A52A2A', '#808080', '#90EE90', '#FFB6C1', '#87CEEB'
+        ];
+
+        // 状態管理
+        let currentColor = colors[0];
+        let isDrawing = false;
+        let isEraserMode = false;
+        let grid = [];
+
+        // DOM要素の取得
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPalette = document.getElementById('colorPalette');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const modeToggle = document.getElementById('modeToggle');
+
+        // 初期化
+        function init() {
+            // キャンバスサイズの設定
+            canvas.width = gridSize * pixelSize;
+            canvas.height = gridSize * pixelSize;
+            
+            // グリッドの初期化（全て白で埋める）
+            grid = [];
+            for (let i = 0; i < gridSize; i++) {
+                grid[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    grid[i][j] = '#FFFFFF';
+                }
+            }
+            
+            drawGrid();
+            createColorPalette();
+        }
+
+        // カラーパレットの作成
+        function createColorPalette() {
+            colorPalette.innerHTML = '';
+            colors.forEach((color, index) => {
+                const colorBtn = document.createElement('div');
+                colorBtn.className = 'color-btn';
+                colorBtn.style.backgroundColor = color;
+                if (index === 0) colorBtn.classList.add('active');
+                
+                colorBtn.addEventListener('click', () => {
+                    currentColor = color;
+                    isEraserMode = false;
+                    updateModeToggle();
+                    document.querySelectorAll('.color-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    colorBtn.classList.add('active');
+                });
+                
+                colorPalette.appendChild(colorBtn);
+            });
+        }
+
+        // グリッドの描画
+        function drawGrid() {
+            // 背景をクリア
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 各ピクセルを描画
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    ctx.fillStyle = grid[i][j];
+                    ctx.fillRect(j * pixelSize, i * pixelSize, pixelSize, pixelSize);
+                    
+                    // グリッド線
+                    ctx.strokeStyle = '#ddd';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(j * pixelSize, i * pixelSize, pixelSize, pixelSize);
+                }
+            }
+        }
+
+        // マウス座標からグリッド座標を取得
+        function getGridPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const col = Math.floor(x / pixelSize);
+            const row = Math.floor(y / pixelSize);
+            
+            return { row, col };
+        }
+
+        // ピクセルを塗る
+        function paintPixel(row, col) {
+            if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+                grid[row][col] = isEraserMode ? '#FFFFFF' : currentColor;
+                drawGrid();
+            }
+        }
+
+        // マウスイベント
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const { row, col } = getGridPosition(e);
+            paintPixel(row, col);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) {
+                const { row, col } = getGridPosition(e);
+                paintPixel(row, col);
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // クリアボタン
+        clearBtn.addEventListener('click', () => {
+            if (confirm('キャンバスをクリアしますか？')) {
+                init();
+            }
+        });
+
+        // モード切り替えボタン
+        modeToggle.addEventListener('click', () => {
+            isEraserMode = !isEraserMode;
+            updateModeToggle();
+        });
+
+        function updateModeToggle() {
+            if (isEraserMode) {
+                modeToggle.textContent = '消しゴムモード';
+                modeToggle.classList.add('eraser');
+            } else {
+                modeToggle.textContent = 'ペンモード';
+                modeToggle.classList.remove('eraser');
+            }
+        }
+
+        // 画像として保存
+        downloadBtn.addEventListener('click', () => {
+            // グリッド線なしのキャンバスを作成
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = gridSize * pixelSize;
+            exportCanvas.height = gridSize * pixelSize;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    exportCtx.fillStyle = grid[i][j];
+                    exportCtx.fillRect(j * pixelSize, i * pixelSize, pixelSize, pixelSize);
+                }
+            }
+            
+            // ダウンロード
+            const link = document.createElement('a');
+            link.download = 'pixel-art.png';
+            link.href = exportCanvas.toDataURL();
+            link.click();
+        });
+
+        // 初期化実行
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おみくじアプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #667eea;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        #result {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 30px 0;
+            color: #333;
+        }
+
+        #message {
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .emoji {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>おみくじ</h1>
+        <div class="emoji" id="emoji">🎴</div>
+        <div id="result"></div>
+        <div id="message"></div>
+        <button onclick="drawOmikuji()">運試し</button>
+    </div>
+
+    <script>
+        // おみくじの結果を配列で用意
+        const fortunes = [
+            { result: "大吉", message: "最高の運勢です...何をしてもうまくいく日！", emoji: "🌟" },
+            { result: "中吉", message: "良いことがありそう...", emoji: "😊" },
+            { result: "小吉", message: "小さな幸せが訪れます...", emoji: "🍀" },
+            { result: "吉", message: "まずまずの運勢です...", emoji: "👍" },
+            { result: "末吉", message: "そのうちいいことがあるかも...", emoji: "🌱" },
+            { result: "凶", message: "気をつけて過ごしましょう...", emoji: "😅" }
+        ];
+
+        // おみくじを引く関数
+        function drawOmikuji() {
+            // ランダムな数字を生成（0から配列の長さ-1まで）
+            const randomIndex = Math.floor(Math.random() * fortunes.length);
+            
+            // 選ばれたおみくじを取得
+            const selectedFortune = fortunes[randomIndex];
+            
+            // 結果を画面に表示
+            document.getElementById('result').textContent = selectedFortune.result;
+            document.getElementById('message').textContent = selectedFortune.message;
+            document.getElementById('emoji').textContent = selectedFortune.emoji;
+        }
+    </script>
+</body>
+</html>

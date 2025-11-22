@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色変更ゲーム</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #3498db;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .color-display {
+            background-color: #f0f0f0;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        #colorCode {
+            font-size: 36px;
+            font-weight: bold;
+            font-family: Courier New, monospace;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        #colorName {
+            font-size: 20px;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .color-preview {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border: 5px solid #333;
+        }
+
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>色変更ゲーム</h1>
+        
+        <div class="color-display">
+            <div class="color-preview" id="colorPreview"></div>
+            <div id="colorCode">#ff0000</div>
+        </div>
+
+        <button onclick="changeColor()">色を変える</button>
+    </div>
+
+    <script>
+        // 色を変える関数（ランダムな色を生成）
+        function changeColor() {
+            // RGB値をランダムに生成（0-255）
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            
+            // 16進数のカラーコードに変換
+            const colorCode = "#" + 
+                r.toString(16).padStart(2, '0') + 
+                g.toString(16).padStart(2, '0') + 
+                b.toString(16).padStart(2, '0');
+            
+            // 色を適用
+            applyColor(colorCode.toUpperCase());
+        }
+
+        // 色を画面に適用する関数
+        function applyColor(colorCode) {
+            // 背景色を変更
+            document.body.style.backgroundColor = colorCode;
+            
+            // プレビューの色を変更
+            document.getElementById('colorPreview').style.backgroundColor = colorCode;
+            
+            // カラーコードを表示
+            document.getElementById('colorCode').textContent = colorCode;
+        }
+
+        changeColor();
+    </script>
+</body>
+</html>

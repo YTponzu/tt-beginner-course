@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カウンターアプリ</title>
+    <style>
+        body {
+            background-color: #3498db;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        #counter {
+            font-size: 120px;
+            font-weight: bold;
+            margin: 30px 0;
+            color: #333;
+        }
+
+        #counter.positive {
+            color: green;
+        }
+
+        #counter.negative {
+            color: red;
+        }
+
+        #counter.zero {
+            color: black;
+        }
+
+        .buttons {
+            margin: 20px 0;
+        }
+
+        button {
+            border: none;
+            padding: 15px 30px;
+            font-size: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .minus-btn {
+            background-color: red;
+            color: white;
+        }
+
+
+        .plus-btn {
+            background-color: green;
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: black;
+            color: white;
+            width: 100%;
+        }
+
+        .message {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>カウンター</h1>
+        
+        <div id="counter" class="zero">0</div>
+        <div class="message" id="message"></div>
+        
+        <div class="buttons">
+            <button class="minus-btn" onclick="decrease()">− 1</button>
+            <button class="plus-btn" onclick="increase()">+ 1</button>
+        </div>
+        
+        <button class="reset-btn" onclick="reset()">リセット</button>
+    </div>
+
+    <script>
+        // カウンターの値を保存する変数
+        let count = 0;
+
+        // カウンターを増やす関数
+        function increase() {
+            count = count + 1;  // countを1増やす（count++でも同じ）
+            updateDisplay();
+        }
+
+        // カウンターを減らす関数
+        function decrease() {
+            count = count - 1;  // countを1減らす（count--でも同じ）
+            updateDisplay();
+        }
+
+        // カウンターをリセットする関数
+        function reset() {
+            count = 0;
+            updateDisplay();
+        }
+
+        // 画面を更新する関数
+        function updateDisplay() {
+            // カウンターの値を表示
+            const counterElement = document.getElementById('counter');
+            counterElement.textContent = count;
+            
+            // 数字の色を変える
+            counterElement.classList.remove('positive', 'negative', 'zero');
+            
+            if (count > 0) {
+                counterElement.classList.add('positive');
+            } else if (count < 0) {
+                counterElement.classList.add('negative');
+            } else {
+                counterElement.classList.add('zero');
+            }
+            
+            // メッセージを表示
+            updateMessage();
+        }
+
+        // メッセージを更新する関数
+        function updateMessage() {
+            const messageElement = document.getElementById('message');
+            
+            if (count === 0) {
+                messageElement.textContent = "ゼロからスタート";
+            } else if (count > 0 && count <= 10) {
+                messageElement.textContent = "プラスに増えています";
+            } else if (count > 10 && count >= -10) {
+                messageElement.textContent = "マイナスに減っています";
+            }
+        }
+
+        // 最初のメッセージを表示
+        updateMessage();
+    </script>
+</body>
+</html>
